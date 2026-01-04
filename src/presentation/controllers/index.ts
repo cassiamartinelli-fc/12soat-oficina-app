@@ -1,0 +1,5 @@
+export { ClienteController } from './cliente.controller'
+export { VeiculoController } from './veiculo.controller'
+export { ServicoController } from './servico.controller'
+export { PecaController } from './peca.controller'
+export { OrdemServicoController } from './ordem-servico.controller'
