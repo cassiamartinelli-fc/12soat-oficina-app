@@ -39,6 +39,9 @@ RUN npm ci --only=production && npm cache clean --force
 # Copiar build da aplicação do estágio anterior
 COPY --from=builder /app/dist ./dist
 
+# Copiar arquivo de configuração do New Relic
+COPY --from=builder /app/newrelic.js ./newrelic.js
+
 # Mudar ownership dos arquivos para o usuário nestjs
 RUN chown -R nestjs:nodejs /app
 USER nestjs
