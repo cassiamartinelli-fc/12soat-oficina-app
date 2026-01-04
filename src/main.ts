@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 require('newrelic')
 
 import { NestFactory } from '@nestjs/core'
@@ -36,4 +37,4 @@ async function bootstrap() {
   console.log('🚀 Servidor rodando em: http://localhost:3000')
   console.log('📚 Swagger docs em: http://localhost:3000/api-docs')
 }
-bootstrap()
+void bootstrap()
