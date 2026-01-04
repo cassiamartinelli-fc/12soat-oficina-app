@@ -1,0 +1,3 @@
+# Ignorar secrets com valores reais
+secret.local.yaml
+*-local.yaml
