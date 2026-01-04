@@ -1,8 +1,8 @@
 {
   "name": "12soat-oficina-app",
   "version": "2.0.0",
-  "description": "Tech Challenge 12SOAT - Fase 3 - Aplicação NestJS executando em Kubernetes",
-  "author": "Grupo 137 - Cassia Martinelli",
+  "description": "Tech Challenge 12SOAT - Fase 3 - Oficina App",
+  "author": "Grupo 70 - Cassia Martinelli",
   "private": true,
   "license": "MIT",
   "scripts": {
