@@ -1,0 +1,7 @@
+export * from './cliente.entity'
+export * from './veiculo.entity'
+export * from './peca.entity'
+export * from './servico.entity'
+export * from './ordem-servico.entity'
+export * from './item-ordem-servico.entity'
+export * from './peca-ordem-servico.entity'

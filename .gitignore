@@ -3,9 +3,16 @@ dist/
 .env
 *.log
 coverage/
+coverage-e2e/
 .DS_Store
 *.tfstate
 .terraform/
 *.tfvars
 .vscode/
 .idea/
+*.db
+*.db-journal
+.scannerwork/
+reports/
+yarn.lock
+terraform.tfstate.backup
