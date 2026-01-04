@@ -43,6 +43,11 @@ spec:
             secretKeyRef:
               name: oficina-app-secrets
               key: JWT_SECRET
+        - name: NEWRELIC_LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: oficina-app-secrets
+              key: NEWRELIC_LICENSE_KEY
         resources:
           requests:
             memory: "256Mi"
