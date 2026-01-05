@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common'
 
 @Injectable()
 export class MetricsService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private newrelic: any
 
   constructor() {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
       this.newrelic = require('newrelic')
-    } catch (error) {
+    } catch {
       console.warn('New Relic not available, metrics will be disabled')
       this.newrelic = null
     }
