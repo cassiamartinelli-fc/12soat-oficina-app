@@ -39,6 +39,9 @@ import { ORDEM_SERVICO_REPOSITORY_TOKEN } from './ddd.module'
 import { PecaDddModule } from './peca-ddd.module'
 import { ServicoDddModule } from './servico-ddd.module'
 
+// Services
+import { MetricsService } from '../shared/services/metrics.service'
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrdemServicoOrmEntity, ItemOrdemServicoOrmEntity, PecaOrdemServicoOrmEntity]),
@@ -46,6 +49,9 @@ import { ServicoDddModule } from './servico-ddd.module'
     PecaDddModule,
   ],
   providers: [
+    // Services
+    MetricsService,
+
     // Mappers
     OrdemServicoMapper,
     ItemServicoMapper,
