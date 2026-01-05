@@ -11,6 +11,7 @@ import { PecaDddModule } from './infrastructure/peca-ddd.module'
 import { OrdemServicoDddModule } from './infrastructure/ordem-servico-ddd.module'
 import { AuthModule } from './auth/auth.module'
 import { HealthController } from './health/health.controller'
+import { MetricsService } from './shared/services/metrics.service'
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { HealthController } from './health/health.controller'
     AuthModule,
   ],
   controllers: [AppController, HealthController],
-  providers: [AppService],
+  providers: [AppService, MetricsService],
+  exports: [MetricsService],
 })
 export class AppModule {}
