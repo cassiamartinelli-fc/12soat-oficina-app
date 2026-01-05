@@ -11,6 +11,7 @@ import {
   SERVICO_REPOSITORY_TOKEN,
 } from '../../../infrastructure/ddd.module'
 import { EntityNotFoundException } from '../../../shared/exceptions/domain.exception'
+import { MetricsService } from '../../../shared/services/metrics.service'
 import { PecaId, ServicoId } from '../../../shared/types/entity-id'
 import { ItemPecaCreateDto, ItemServicoCreateDto } from '../../dto/ordem-servico/create-ordem-servico-v2.dto'
 
@@ -30,6 +31,7 @@ export class CriarOrdemServicoV2UseCase {
     private readonly servicoRepository: IServicoRepository,
     @Inject(PECA_REPOSITORY_TOKEN)
     private readonly pecaRepository: IPecaRepository,
+    private readonly metricsService: MetricsService,
   ) {}
 
   async execute(command: CriarOrdemServicoV2Command): Promise<OrdemServico> {
@@ -83,6 +85,9 @@ export class CriarOrdemServicoV2UseCase {
 
       await this.ordemServicoRepository.adicionarItemPeca(itemPeca)
     }
+
+    // 6. Registrar métrica de ordem de serviço criada
+    this.metricsService.recordOrdemServicoCriada()
 
     return ordemServico
   }
