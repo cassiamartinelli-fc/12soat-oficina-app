@@ -1,77 +1,184 @@
-# 12SOAT - Oficina Mecânica - Application
+# Oficina Mecânica - Aplicação Principal
 
-Aplicação principal NestJS com Clean Architecture (DDD).
+Aplicação NestJS com Clean Architecture (DDD) para gestão de oficina mecânica.
 
-## Stack
-- NestJS + TypeScript
-- Neon PostgreSQL
-- Docker
-- Kubernetes
-- JWT Authentication
+---
 
-## Estrutura
-```
-src/                 - Código NestJS (Clean Architecture)
-k8s/                 - Manifests Kubernetes
-.github/workflows/   - CI/CD
-```
+## 🎯 Propósito
 
-## Arquitetura
+API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e serviços de oficina mecânica. Implementa autenticação JWT via Kong Gateway e observabilidade com New Relic.
 
-### Domain Driven Design (DDD)
+---
+
+## 🛠️ Tecnologias
+
+- **NestJS** - Framework Node.js com TypeScript
+- **TypeORM** - ORM para PostgreSQL
+- **Neon PostgreSQL** - Banco de dados gerenciado (free tier)
+- **Kong Gateway** - API Gateway com autenticação JWT
+- **New Relic** - APM e observabilidade
+- **Kubernetes** - Orquestração de containers
+- **GitHub Actions** - CI/CD automático
+
+---
+
+## 📁 Estrutura DDD
+
 ```
 src/
-├── application/     - DTOs e Use Cases
+├── application/     - DTOs, Use Cases e Mappers
 ├── domain/          - Entidades e Value Objects
-├── infrastructure/  - Persistência e Repositórios
+├── infrastructure/  - Repositórios e Persistência
 ├── presentation/    - Controllers REST
-└── shared/          - Código compartilhado
+└── shared/          - Services e Exceções
 ```
 
-## Deploy Local
+---
+
+## 🚀 Deploy
+
+### **Automático (CI/CD)**
+
+1. Push na branch `main`
+2. GitHub Actions executa build e deploy
+3. Aplicação atualizada em ~5 minutos
+
+### **Local (Desenvolvimento)**
 
 ```bash
-# Instalar dependências
 yarn install
-
-# Rodar em desenvolvimento
 yarn start:dev
-
-# Acessar Swagger
-http://localhost:3000/api-docs
+# Acesse: http://localhost:3000/api-docs
 ```
 
-## Deploy Kubernetes
+### **Kubernetes**
 
 ```bash
-# Build da imagem
-docker build -t oficina-app:latest .
+# Build e push da imagem
+docker build -t ghcr.io/<seu-usuario>/oficina-app:latest .
+docker push ghcr.io/<seu-usuario>/oficina-app:latest
 
-# Aplicar manifests
+# Deploy no cluster
 kubectl apply -f k8s/
-
-# Port forward
-kubectl port-forward svc/oficina-api 3000:80
+kubectl rollout status deployment/oficina-app -n default
 ```
 
-## Secrets Necessários
+---
 
-- `NEON_DATABASE_URL` - Connection string do Neon PostgreSQL
-- `JWT_SECRET` - Segredo para geração de JWT
-- `NEWRELIC_LICENSE_KEY` - License key do New Relic
+## 🔐 Secrets Necessários
 
-## Funcionalidades (Fase 2)
+Configure no GitHub: **Settings → Secrets → Actions**
 
-- Abertura de Ordem de Serviço
-- Consulta de status da OS
-- Aprovação de orçamento
-- Listagem de ordens de serviço
-- Atualização de status da OS
+| Secret | Descrição |
+|--------|-----------|
+| `NEON_DATABASE_URL` | Connection string do Neon PostgreSQL |
+| `JWT_SECRET` | Secret para validação de tokens JWT |
+| `NEW_RELIC_LICENSE_KEY` | License key do New Relic APM |
 
-## APIs Protegidas
+---
 
-Rotas que exigem autenticação JWT via Kong Gateway:
-- `POST /ordens-servico`
-- `GET /ordens-servico/:id`
-- `PATCH /ordens-servico/:id/aprovacao`
-- `PATCH /ordens-servico/:id/status`
+## 📊 Arquitetura
+
+```
+┌─────────────┐
+│   Cliente   │
+└──────┬──────┘
+       │ HTTPS
+       ▼
+┌──────────────┐
+│ Kong Gateway │ (Autenticação JWT)
+└──────┬───────┘
+       │
+       ▼
+┌─────────────────┐
+│ NestJS App      │
+│ (Kubernetes)    │
+│ Min: 2 pods     │
+│ Max: 10 pods    │
+└────────┬────────┘
+         │
+         ▼
+  ┌──────────────┐
+  │ Neon Postgres│
+  └──────────────┘
+         │
+         ▼
+  ┌──────────────┐
+  │  New Relic   │ (APM + Custom Metrics)
+  └──────────────┘
+```
+
+---
+
+## 🔗 APIs Principais
+
+### **Públicas**
+- `GET /health` - Health check
+- `GET /` - API info
+
+### **Protegidas (requerem JWT via Kong)**
+- `POST /ordens-servico` - Criar ordem de serviço
+- `GET /ordens-servico/:id` - Consultar ordem
+- `POST /ordens-servico/:id/aprovacao` - Aprovar orçamento
+- `POST /ordens-servico/:id/status` - Atualizar status
+- `GET /ordens-servico/em-andamento` - Listar OS em andamento
+
+**Documentação completa:** http://localhost:3000/api-docs (Swagger)
+
+---
+
+## 📈 Observabilidade
+
+### **New Relic APM**
+- Performance de endpoints
+- Latência de banco de dados
+- Taxa de erros
+
+### **Custom Metrics**
+- `Custom/OrdemServico/Criada` - Total de OS criadas
+- `Custom/OrdemServico/TempoNoStatus/{status}` - Tempo médio por status
+- `Custom/OrdemServico/Transicao/{de}_para_{para}` - Transições de status
+
+---
+
+## 🧪 Como Testar
+
+### **Health Check**
+```bash
+kubectl port-forward svc/oficina-app-service 3000:80 -n default
+curl http://localhost:3000/health
+```
+
+### **Criar Ordem de Serviço (via Kong)**
+```bash
+# 1. Obter token JWT da Lambda de autenticação
+TOKEN=$(curl -X POST https://<lambda-url> \
+  -H "Content-Type: application/json" \
+  -d '{"cpf":"12345678900"}' | jq -r '.token')
+
+# 2. Criar OS via Kong Gateway
+curl -X POST http://<kong-url>/ordens-servico \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clienteId": "<uuid>",
+    "veiculoId": "<uuid>",
+    "servicos": [],
+    "pecas": []
+  }'
+```
+
+---
+
+## 🔗 Recursos
+
+- **Swagger**: http://localhost:3000/api-docs
+- **Health Check**: http://localhost:3000/health
+- **New Relic Dashboard**: https://one.newrelic.com/
+- **GitHub Actions**: https://github.com/<usuario>/12soat-oficina-app/actions
+
+---
+
+## 📄 Licença
+
+MIT - Tech Challenge 12SOAT Fase 3
