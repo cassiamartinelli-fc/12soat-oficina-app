@@ -14,5 +14,5 @@ coverage-e2e/
 *.db-journal
 .scannerwork/
 reports/
-yarn.lock
+package-lock.json
 terraform.tfstate.backup

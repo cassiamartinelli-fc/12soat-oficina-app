@@ -7,16 +7,16 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 # Copiar arquivos de dependências
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
 # Instalar dependências
-RUN npm ci
+RUN yarn install --frozen-lockfile
 
 # Copiar código fonte
 COPY . .
 
 # Build da aplicação
-RUN npm run build
+RUN yarn build
 
 # Estágio de produção
 FROM node:20-alpine AS production
@@ -31,10 +31,10 @@ RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
 
 # Copiar arquivos de dependências
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
 # Instalar dependências de produção
-RUN npm ci --only=production && npm cache clean --force
+RUN yarn install --frozen-lockfile --production && yarn cache clean
 
 # Copiar build da aplicação do estágio anterior
 COPY --from=builder /app/dist ./dist

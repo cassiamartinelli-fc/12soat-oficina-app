@@ -6,7 +6,7 @@ Aplicação NestJS com Clean Architecture (DDD) para gestão de oficina mecânic
 
 ## 🎯 Propósito
 
-API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e serviços de oficina mecânica. Implementa autenticação JWT via Kong Gateway e observabilidade com New Relic.
+API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e serviços de oficina mecânica. Implementa autenticação JWT via Kong API Gateway e observabilidade com New Relic.
 
 ---
 
@@ -14,7 +14,7 @@ API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e
 
 - **NestJS** - Framework Node.js com TypeScript
 - **TypeORM** - ORM para PostgreSQL
-- **Neon PostgreSQL** - Banco de dados gerenciado (free tier)
+- **Neon PostgreSQL** - Banco de dados gerenciado
 - **Kong Gateway** - API Gateway com autenticação JWT
 - **New Relic** - APM e observabilidade
 - **Kubernetes** - Orquestração de containers
