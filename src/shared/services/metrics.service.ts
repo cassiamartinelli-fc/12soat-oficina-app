@@ -21,7 +21,10 @@ export class MetricsService {
   recordOrdemServicoCriada(): void {
     if (!this.newrelic) return
 
-    this.newrelic.recordMetric('Custom/OrdemServico/Criada', 1)
+    this.newrelic.recordCustomEvent('OrdemServicoCriada', {
+      timestamp: Date.now(),
+      eventType: 'criacao',
+    })
   }
 
   /**
@@ -32,7 +35,11 @@ export class MetricsService {
   recordTempoNoStatus(status: string, tempoEmMinutos: number): void {
     if (!this.newrelic) return
 
-    this.newrelic.recordMetric(`Custom/OrdemServico/TempoNoStatus/${status}`, tempoEmMinutos)
+    this.newrelic.recordCustomEvent('OrdemServicoTempoStatus', {
+      status,
+      tempoEmMinutos,
+      timestamp: Date.now(),
+    })
   }
 
   /**
@@ -43,7 +50,12 @@ export class MetricsService {
   recordMudancaStatus(statusAnterior: string, novoStatus: string): void {
     if (!this.newrelic) return
 
-    this.newrelic.recordMetric(`Custom/OrdemServico/Transicao/${statusAnterior}_para_${novoStatus}`, 1)
+    this.newrelic.recordCustomEvent('OrdemServicoMudancaStatus', {
+      statusAnterior,
+      novoStatus,
+      transicao: `${statusAnterior}_para_${novoStatus}`,
+      timestamp: Date.now(),
+    })
   }
 
   /**
@@ -53,6 +65,9 @@ export class MetricsService {
   recordErroOrdemServico(tipoErro: string): void {
     if (!this.newrelic) return
 
-    this.newrelic.recordMetric(`Custom/OrdemServico/Erro/${tipoErro}`, 1)
+    this.newrelic.recordCustomEvent('OrdemServicoErro', {
+      tipoErro,
+      timestamp: Date.now(),
+    })
   }
 }
