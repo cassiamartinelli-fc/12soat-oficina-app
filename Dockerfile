@@ -26,6 +26,12 @@ WORKDIR /app
 # Instalar curl para health checks e dumb-init para signal handling
 RUN apk add --no-cache curl dumb-init
 
+# Instalar build tools para native-metrics (temporário)
+RUN apk add --no-cache --virtual .build-deps \
+    python3 \
+    make \
+    g++
+
 # Criar usuário não-root para segurança
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
@@ -35,6 +41,9 @@ COPY package.json yarn.lock ./
 
 # Instalar dependências de produção
 RUN yarn install --frozen-lockfile --production && yarn cache clean
+
+# Remover build tools para reduzir tamanho da imagem
+RUN apk del .build-deps
 
 # Copiar build da aplicação do estágio anterior
 COPY --from=builder /app/dist ./dist
