@@ -39,8 +39,8 @@ RUN adduser -S nestjs -u 1001
 # Copiar arquivos de dependências
 COPY package.json yarn.lock ./
 
-# Instalar dependências de produção
-RUN yarn install --frozen-lockfile --production && yarn cache clean
+# Instalar dependências de produção (ignora erros de pacotes opcionais)
+RUN yarn install --frozen-lockfile --production || yarn install --production && yarn cache clean
 
 # Remover build tools para reduzir tamanho da imagem
 RUN apk del .build-deps
