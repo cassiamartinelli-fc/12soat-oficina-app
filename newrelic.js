@@ -19,6 +19,14 @@ exports.config = {
   error_collector: {
     enabled: true
   },
+  plugins: {
+    native_metrics: {
+      enabled: true
+    }
+  },
+  custom_insights_events: {
+    enabled: true
+  },
   allow_all_headers: true,
   attributes: {
     exclude: [
