@@ -1,26 +1,30 @@
-# Oficina Mecânica - Aplicação Principal
+# Oficina Mecânica — Aplicação Principal
 
-Aplicação NestJS com Clean Architecture (DDD) para gestão de oficina mecânica.
+Aplicação NestJS (Clean Architecture / DDD) para gestão de oficina mecânica. Este README é o ponto de partida para rodar o projeto completo (4 repositórios).
 
-## 📦 Repositórios do Projeto
-
-Este projeto está dividido em 4 repositórios:
-
-1. **[12soat-oficina-app](https://github.com/cassiamartinelli-fc/12soat-oficina-app)** ← Você está aqui
-   - Aplicação NestJS (API REST)
-
-2. **[12soat-oficina-lambda-auth](https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth)**
-   - Lambda serverless para autenticação JWT
-
-3. **[12soat-oficina-infra-k8s](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s)**
-   - Infraestrutura Kubernetes (Kong Gateway + New Relic)
-
-4. **[12soat-oficina-infra-database](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-database)**
-   - Banco de dados Neon PostgreSQL
 
 ## 🎯 Propósito
 
 API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e serviços de oficina mecânica. Implementa autenticação JWT via Kong API Gateway e observabilidade com New Relic.
+
+## 🔗 Links
+
+- Vídeo de apresentação do projeto: 
+- Collection do Postman: [Oficina Mecânica API](https://www.postman.com/cassia-martinelli-9397607/workspace/cassia-s-workspace/request/46977418-4a758cc9-d08a-4ca6-ab97-b522149755d5?action=share&creator=46977418&ctx=documentation)
+- Swagger/API Docs: `<KONG_URL>/api-docs`
+- Health Check: `<KONG_URL>/health`
+- Repositórios:
+  - https://github.com/cassiamartinelli-fc/12soat-oficina-infra-database
+  - https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s
+  - https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth
+  - https://github.com/cassiamartinelli-fc/12soat-oficina-app
+
+## 📚 Repositórios do Projeto
+
+- **12soat-oficina-app** — Aplicação principal: API NestJS (este repo)
+- **12soat-oficina-lambda-auth** — Lambda (Function Serverless): validação de CPF e emissão de JWT
+- **12soat-oficina-infra-k8s** — Infraestrutura Kubernetes (Terraform): Kong, manifests, New Relic
+- **12soat-oficina-infra-database** — Infraestrutura do Banco de Dados Gerenciado (Terraform): Neon PostgreSQL
 
 ## 🛠️ Tecnologias
 
@@ -43,219 +47,141 @@ src/
 └── shared/          - Services e Exceções
 ```
 
+## 🚀 Provisionamento e Deploy da aplicação
 
-## 📋 **Pré-requisitos**
+### 1. Banco de Dados (infra-database)
 
-### *Docker Desktop* instalado e rodando
+  ```
+  ⚠️ Não é necessária nenhuma ação.
+  ```
 
-- Download: https://www.docker.com/products/docker-desktop
-- Após instalar, habilite Kubernetes em: Settings → Kubernetes → Enable Kubernetes
+   - O banco PostgreSQL **já está provisionado e rodando** em produção (Neon).
+   - Secrets `NEON_API_KEY` e `NEON_ORG_ID` já estão configurados no repositório.
+   - Para replicar em sua própria conta Neon, consulte [12soat-oficina-infra-database](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-database).
 
-### *kubectl* instalado
+### 2. Infraestrutura AWS (infra-k8s)
 
-```bash
-# macOS
-brew install kubectl
+  2.1. Provisionar infraestrutura:
+  ```
+  Execute workflow `Terraform AWS` → apply (aguardar ~3 min)
+  ```
 
-# Verificar instalação
-kubectl version --client
+  2.2. Obter URL pública e informações da infraestrutura:
+  ```
+  Execute workflow `Terraform AWS` → output
+  ```
+
+  2.3. Validar provisionamento (health check):
+  ```bash
+  # Substituir <KONG_URL> por URL obtida no passo 2.2
+  curl <KONG_URL>/health
+  ```
+
+   - Secrets necessários já estão configurados no repositório.
+   - Para replicar em sua própria conta AWS, consulte [12soat-oficina-infra-k8s](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s).
+
+### 3. Aplicação Principal (oficina-app)
+
+  ```
+  ⚠️ Não é necessária nenhuma ação.
+  ```
+
+   - **Deploy automático:** Foi provisionada junto com a infraestrutura AWS (EC2 + Docker) no passo 2.
+   - A aplicação cria automaticamente a tabela `clientes` no banco (necessária para Lambda).
+
+### 4. Lambda de Autenticação (lambda-auth)
+   
+  4.1. Deploy da Lambda:
+  ```
+  Execute workflow `CD - Deploy Lambda to AWS`
+  ```
+  4.2. Aguarde finalização do deploy e verifique URL da Lambda no summary do workflow.
+  
+  4.3. Gerar token JWT com Lambda:
+  ```bash
+  curl -X POST "https://gazxy4ae3ittomlpjso27mbuni0popxn.lambda-url.us-east-1.on.aws/" \
+  -H "Content-Type: application/json" \
+  -d '{"cpf":"11144477735"}'
+  ```
+
+  - A Lambda valida o CPF na tabela `clientes` e gera um token JWT.
+  - Kong Gateway já está configurado para aceitar tokens JWT (configurado no passo 2).
+  - Para replicar em sua própria conta AWS, consulte [12soat-oficina-lambda-auth](https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth).
+
+## ⚙️ Comandos essenciais
+
+### Obter URL da aplicação
+
+```
+Execute workflow "Terraform AWS" → "output"
 ```
 
-### *Cluster Kubernetes* ativo
-
-- Ativar Kubernetes
-
-  Via Docker Desktop:
-    ```bash
-      # 1. Abra Docker Desktop → Vá em Settings (ícone de engrenagem) →
-      # 2. Vá em Kubernetes (menu lateral)
-      # 3. Marque "Enable Kubernetes"
-      # 4. Clique em "Apply & Restart"
-      # 5. Aguarde o ícone do Kubernetes ficar verde
-      kubectl cluster-info
-      kubectl get nodes
-      # Deve mostrar: docker-desktop   Ready
-    ```
-
-  Via kind:
-    ```bash
-      # 1. Instalar kind
-      brew install kind
-      # 2. Criar cluster
-      kind create cluster --name oficina
-      # 3. Verificar
-      kubectl get nodes
-      # Deve mostrar: oficina-control-plane   Ready
-    ```
-
-### *Banco de dados Neon PostgreSQL* criado e configurado
-
-- Siga: [12soat-oficina-infra-database](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-database)
-- Tenha em mãos a connection string do banco
-
-## 🚀 Deploy da Aplicação Completa
-
-### **1. Configurar Secrets do Kubernetes**
-
-Crie os secrets necessários:
-
-```bash
-# Secret do banco Neon PostgreSQL
-# Substitua "postgresql://user:pass@host/db" pela sua connection string
-kubectl create secret generic app-secrets \
-  --from-literal=NEON_DATABASE_URL="postgresql://user:pass@host/db" \
-  -n default
-
-# Secret do New Relic
-# Substitua "seu-license-key" pela sua license key
-kubectl create secret generic app-secrets \
-  --from-literal=NEW_RELIC_LICENSE_KEY="seu-license-key" \
-  -n default --dry-run=client -o yaml | kubectl apply -f -
-```
-
-### **2. Deploy da Aplicação**
-
-```bash
-# Aplicar manifestos Kubernetes
-kubectl apply -f k8s/
-
-# Aguardar pods ficarem prontos (pode levar 2-3 minutos)
-kubectl wait --for=condition=ready pod -l app=oficina-app -n default --timeout=300s
-
-# Verificar status
-kubectl get pods -n default
-```
-
-### **3. Acessar a Aplicação**
-
-```bash
-# Port forward para acessar localmente
-kubectl port-forward svc/oficina-app-service 3000:80 -n default
-
-# Acesse no navegador:
-# - API: http://localhost:3000
-# - Swagger: http://localhost:3000/api-docs
-# - Health: http://localhost:3000/health
-```
-
-### **4. Testar API**
+### Testar aplicação (rotas públicas - GET)
 
 ```bash
 # Health check
-curl http://localhost:3000/health
+curl <KONG_URL>/health
 
-# Criar cliente (necessário para autenticação posterior)
-curl -X POST http://localhost:3000/clientes \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nome": "João Silva",
-    "cpfCnpj": "12345678900",
-    "telefone": "11999999999"
-  }'
+# Listar clientes
+curl <KONG_URL>/clientes
 
-# Criar veículo (use o clienteId retornado acima)
-curl -X POST http://localhost:3000/veiculos \
-  -H "Content-Type: application/json" \
-  -d '{
-    "clienteId": "<uuid-do-cliente>",
-    "placa": "ABC1234",
-    "modelo": "Civic",
-    "marca": "Honda",
-    "ano": 2020
-  }'
+# Listar veículos
+curl <KONG_URL>/veiculos
 
-# Criar ordem de serviço (use clienteId e veiculoId)
-curl -X POST http://localhost:3000/ordens-servico \
-  -H "Content-Type: application/json" \
-  -d '{
-    "clienteId": "<uuid-cliente>",
-    "veiculoId": "<uuid-veiculo>",
-    "servicos": [],
-    "pecas": []
-  }'
+# Listar serviços
+curl <KONG_URL>/servicos
 ```
 
-### **5. Verificar Métricas no New Relic**
-
-1. Acesse: https://one.newrelic.com/
-2. Vá em **Query your data** (NRQL)
-3. Execute:
-   ```sql
-   FROM Metric SELECT count(*)
-   WHERE metricName = 'Custom/OrdemServico/Criada'
-   SINCE 1 hour ago
-   ```
-
-## 🔐 Setup de Autenticação (Opcional)
-
-Para habilitar autenticação JWT via Kong Gateway, execute **após** ter a aplicação rodando:
-
-### **1. Deploy da Lambda de Autenticação**
-
-Siga: [12soat-oficina-lambda-auth](https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth)
-- Deploy da Lambda Function
-- Copiar URL da Lambda Function
-
-### **2. Configurar Kong Gateway**
-
-Siga: [12soat-oficina-infra-k8s](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s)
-- Instalar Kong Gateway no cluster
-- Configurar plugin JWT apontando para a Lambda
-
-### **3. Testar Autenticação**
+### Autenticação e rotas protegidas
 
 ```bash
-# 1. Obter token JWT (use CPF do cliente cadastrado no passo 4)
-TOKEN=$(curl -X POST https://<lambda-url> \
+# 1. Obter KONG_URL e LAMBDA_URL nos passos 2.2 e 4.2, respectivamente, de Provisionamento e Deploy da aplicação
+
+# 2. Autenticar com CPF (substituir <LAMBDA_URL>)
+TOKEN=$(curl -X POST <LAMBDA_URL> \
   -H "Content-Type: application/json" \
   -d '{"cpf":"12345678900"}' | jq -r '.token')
 
-# 2. Criar OS via Kong Gateway
-curl -X POST http://<kong-url>/ordens-servico \
-  -H "Authorization: Bearer $TOKEN" \
+# 3. Usar token em rotas protegidas (POST, PATCH, DELETE)
+curl -X POST <KONG_URL>/clientes \
   -H "Content-Type: application/json" \
-  -d '{
-    "clienteId": "<uuid>",
-    "veiculoId": "<uuid>",
-    "servicos": [],
-    "pecas": []
-  }'
+  -d '{"nome":"Maria Santos","cpfCnpj":"52998224725","telefone":"11988887777"}'
+
+curl -X POST <KONG_URL>/servicos \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"nome":"Troca de óleo","preco":150.00,"tempoEstimado":60}'
+
+curl -X DELETE <KONG_URL>/servicos/1 \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
-## 🛠️ Deploy Alternativo
-
-### **Desenvolvimento Local (sem Kubernetes)**
+### Desenvolvimento local
 
 ```bash
-# Instalar dependências
+# 1. Instalar dependências
 yarn install
 
-# Configurar variáveis de ambiente
+# 2. Configurar variáveis de ambiente
 export NEON_DATABASE_URL="postgresql://..."
 export NEW_RELIC_LICENSE_KEY="..."
+export JWT_SECRET="..."
 
-# Rodar em modo dev
+# 3. Executar aplicação
 yarn start:dev
 
-# Acesse: http://localhost:3000/api-docs
+# 4. Acessar Swagger
+# http://localhost:3000/api-docs
 ```
 
-### **CI/CD Automático (GitHub Actions)**
+## 🔐 CI/CD — Secrets e permissões
 
-1. Configure secrets no GitHub (Settings → Secrets)
-2. Push na branch `main`
-3. GitHub Actions faz build e deploy automático
-4. Aplicação atualizada em ~5 minutos
+✅ **Todos os secrets já estão devidamente configurados neste repositório.**
 
-## 🔐 Secrets Necessários
-
-Configure no GitHub: **Settings → Secrets → Actions**
-
-| Secret | Descrição |
-|--------|-----------|
-| `NEON_DATABASE_URL` | Connection string do Neon PostgreSQL |
-| `JWT_SECRET` | Secret para validação de tokens JWT |
-| `NEW_RELIC_LICENSE_KEY` | License key do New Relic APM |
+**Secrets necessários (Settings → Secrets → Actions):**
+- `NEON_DATABASE_URL` — Connection string do Neon PostgreSQL
+- `JWT_SECRET` — Secret para validação de tokens JWT
+- `NEW_RELIC_LICENSE_KEY` - License key do New Relic APM
 
 ## 📊 Arquitetura
 
@@ -315,40 +241,23 @@ Configure no GitHub: **Settings → Secrets → Actions**
 - `Custom/OrdemServico/TempoNoStatus/{status}` - Tempo médio por status
 - `Custom/OrdemServico/Transicao/{de}_para_{para}` - Transições de status
 
-## 🧪 Como Testar
+### SSH e logs (debug)
 
-### **Health Check**
 ```bash
-kubectl port-forward svc/oficina-app-service 3000:80 -n default
-curl http://localhost:3000/health
+# No repositório 12soat-oficina-infra-k8s/terraform
+
+# SSH na instância EC2
+ssh -i ~/.ssh/oficina-key ubuntu@$(terraform output -raw public_ip)
+
+# Ver logs da aplicação
+ssh -i ~/.ssh/oficina-key ubuntu@$(terraform output -raw public_ip) \
+  'docker logs -f $(docker ps -q --filter name=app)'
+
+# Ver logs do Kong
+ssh -i ~/.ssh/oficina-key ubuntu@$(terraform output -raw public_ip) \
+  'docker logs -f $(docker ps -q --filter name=kong)'
 ```
 
-### **Criar Ordem de Serviço (via Kong)**
-```bash
-# 1. Obter token JWT da Lambda de autenticação
-TOKEN=$(curl -X POST https://<lambda-url> \
-  -H "Content-Type: application/json" \
-  -d '{"cpf":"12345678900"}' | jq -r '.token')
+## 📝 Licença
 
-# 2. Criar OS via Kong Gateway
-curl -X POST http://<kong-url>/ordens-servico \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "clienteId": "<uuid>",
-    "veiculoId": "<uuid>",
-    "servicos": [],
-    "pecas": []
-  }'
-```
-
-## 🔗 Recursos
-
-- **Swagger**: http://localhost:3000/api-docs
-- **Health Check**: http://localhost:3000/health
-- **New Relic Dashboard**: https://one.newrelic.com/
-- **GitHub Actions**: https://github.com/cassiamartinelli-fc/12soat-oficina-app/actions
-
-## 📄 Licença
-
-MIT - Tech Challenge 12SOAT Fase 3
+MIT — Tech Challenge 12SOAT Fase 3

@@ -5,9 +5,12 @@ import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+
+  app.useGlobalInterceptors(new LoggingInterceptor())
 
   app.useGlobalPipes(
     new ValidationPipe({
