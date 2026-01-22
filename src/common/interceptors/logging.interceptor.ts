@@ -7,7 +7,8 @@ import {
 import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 import { logger } from '../logger/winston.logger'
-import * as newrelic from 'newrelic'
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const newrelic = require('newrelic')
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -34,7 +35,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap({
-        next: (data) => {
+        next: () => {
           const response = context.switchToHttp().getResponse()
           const statusCode = response.statusCode
           const duration = Date.now() - startTime

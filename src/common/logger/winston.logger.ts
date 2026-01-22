@@ -1,28 +1,31 @@
-import * as winston from 'winston'
-import newrelicFormatter from '@newrelic/winston-enricher'
+export class Logger {
+  private static formatLog(level: string, message: string, meta?: any) {
+    const log = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      service: 'oficina-mecanica-api',
+      environment: process.env.NODE_ENV || 'development',
+      ...meta,
+    }
+    return JSON.stringify(log)
+  }
 
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.errors({ stack: true }),
-  newrelicFormatter(winston),
-  winston.format.json()
-)
+  static info(message: string, meta?: any) {
+    console.log(this.formatLog('info', message, meta))
+  }
 
-export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: logFormat,
-  defaultMeta: {
-    service: 'oficina-mecanica-api',
-    environment: process.env.NODE_ENV || 'development'
-  },
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
-          return `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ''}`
-        })
-      )
-    })
-  ]
-})
+  static error(message: string, meta?: any) {
+    console.error(this.formatLog('error', message, meta))
+  }
+
+  static warn(message: string, meta?: any) {
+    console.warn(this.formatLog('warn', message, meta))
+  }
+
+  static debug(message: string, meta?: any) {
+    console.debug(this.formatLog('debug', message, meta))
+  }
+}
+
+export const logger = Logger
