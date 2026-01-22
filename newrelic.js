@@ -27,6 +27,19 @@ exports.config = {
   custom_insights_events: {
     enabled: true
   },
+  application_logging: {
+    enabled: true,
+    forwarding: {
+      enabled: true,
+      max_samples_stored: 10000
+    },
+    metrics: {
+      enabled: true
+    },
+    local_decorating: {
+      enabled: true
+    }
+  },
   allow_all_headers: true,
   attributes: {
     exclude: [
