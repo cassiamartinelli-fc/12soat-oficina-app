@@ -2,30 +2,42 @@
 
 Aplicação NestJS (Clean Architecture / DDD) para gestão de oficina mecânica. Este README é o ponto de partida para rodar o projeto completo (4 repositórios).
 
+## 📋 Índice
+
+- [🔗 Links Úteis](#-links-úteis)
+- [🎯 Propósito](#-propósito)
+- [🛠️ Tecnologias](#️-tecnologias)
+- [📁 Estrutura DDD](#-estrutura-ddd)
+- [🚀 Provisionamento e Deploy](#-provisionamento-e-deploy-da-aplicação)
+- [⚙️ Comandos Essenciais](#️-comandos-essenciais)
+- [🔐 CI/CD — Secrets](#-cicd--secrets-e-permissões)
+- [📊 Arquitetura](#-arquitetura)
+- [🔗 APIs Principais](#-apis-principais)
+- [📈 Observabilidade](#-observabilidade)
+- [📝 Licença](#-licença)
+
+## 🔗 Links Úteis
+
+### Deploy Ativo
+- **Kong Gateway (API):** Execute workflow `Terraform AWS` → `output` para obter URL
+- **Swagger/API Docs:** `<KONG_URL>/api-docs`
+- **Health Check:** `<KONG_URL>/health`
+- **New Relic APM:** https://one.newrelic.com
+
+### Documentação
+- **Vídeo de Apresentação:** [Em breve]
+- **Postman Collection:** [Oficina Mecânica API](https://www.postman.com/cassia-martinelli-9397607/workspace/cassia-s-workspace/request/46977418-4a758cc9-d08a-4ca6-ab97-b522149755d5?action=share&creator=46977418&ctx=documentation)
+- **Arquitetura:** [Documentação arquitetural](https://github.com/cassiamartinelli-fc/12soat-oficina-app/blob/main/documentacao-arquitetural.pdf)
+
+### Repositórios
+- [12soat-oficina-app](https://github.com/cassiamartinelli-fc/12soat-oficina-app) — Aplicação principal
+- [12soat-oficina-lambda-auth](https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth) — Lambda autenticação
+- [12soat-oficina-infra-k8s](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s) — Infraestrutura AWS
+- [12soat-oficina-infra-database](https://github.com/cassiamartinelli-fc/12soat-oficina-infra-database) — Banco de dados
 
 ## 🎯 Propósito
 
 API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e serviços de oficina mecânica. Implementa autenticação JWT via Kong API Gateway e observabilidade com New Relic.
-
-## 🔗 Links
-
-- Vídeo de apresentação do projeto: 
-- Collection do Postman: [Oficina Mecânica API](https://www.postman.com/cassia-martinelli-9397607/workspace/cassia-s-workspace/request/46977418-4a758cc9-d08a-4ca6-ab97-b522149755d5?action=share&creator=46977418&ctx=documentation)
-- Swagger/API Docs: `<KONG_URL>/api-docs`
-- Health Check: `<KONG_URL>/health`
-- Repositórios:
-  - https://github.com/cassiamartinelli-fc/12soat-oficina-infra-database
-  - https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s
-  - https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth
-  - https://github.com/cassiamartinelli-fc/12soat-oficina-app
-- Arquitetura: [Documentação arquitetural](https://github.com/cassiamartinelli-fc/12soat-oficina-app/blob/main/documentacao-arquitetural.pdf)
-
-## 📚 Repositórios do Projeto
-
-- **12soat-oficina-app** — Aplicação principal: API NestJS (este repo)
-- **12soat-oficina-lambda-auth** — Lambda (Function Serverless): validação de CPF e emissão de JWT
-- **12soat-oficina-infra-k8s** — Infraestrutura Kubernetes (Terraform): Kong, manifests, New Relic
-- **12soat-oficina-infra-database** — Infraestrutura do Banco de Dados Gerenciado (Terraform): Neon PostgreSQL
 
 ## 🛠️ Tecnologias
 
@@ -129,8 +141,14 @@ curl <KONG_URL>/clientes
 # Listar veículos
 curl <KONG_URL>/veiculos
 
+# Listar peças
+curl <KONG_URL>/pecas
+
 # Listar serviços
 curl <KONG_URL>/servicos
+
+# Listar ordens de serviço
+curl <KONG_URL>/ordens-servico
 ```
 
 ### Autenticação e rotas protegidas
@@ -217,30 +235,62 @@ yarn start:dev
 
 ## 🔗 APIs Principais
 
-### **Públicas**
+### **Públicas (GET)**
 - `GET /health` - Health check
-- `GET /` - API info
+- `GET /clientes` - Listar clientes
+- `GET /veiculos` - Listar veículos
+- `GET /pecas` - Listar peças
+- `GET /servicos` - Listar serviços
+- `GET /ordens-servico` - Listar ordens de serviço
 
-### **Protegidas (requerem JWT via Kong)**
+### **Protegidas (POST, PATCH, DELETE via JWT)**
+- `POST /clientes` - Criar cliente
+- `POST /veiculos` - Criar veículo
+- `POST /pecas` - Criar peça
+- `POST /servicos` - Criar serviço
 - `POST /ordens-servico` - Criar ordem de serviço
-- `GET /ordens-servico/:id` - Consultar ordem
-- `POST /ordens-servico/:id/aprovacao` - Aprovar orçamento
-- `POST /ordens-servico/:id/status` - Atualizar status
-- `GET /ordens-servico/em-andamento` - Listar OS em andamento
+- `PATCH /{recurso}/:id` - Atualizar recurso
+- `DELETE /{recurso}/:id` - Deletar recurso
 
-**Documentação completa:** http://localhost:3000/api-docs (Swagger)
+**Documentação completa:** `<KONG_URL>/api-docs` (Swagger)
+
+### **Status da Ordem de Serviço**
+
+- `RECEBIDA` - Status inicial da ordem
+- `EM_DIAGNOSTICO` - Ordem em análise técnica
+- `AGUARDANDO_APROVACAO` - Aguardando aprovação do cliente
+- `EM_EXECUCAO` - Serviço sendo executado (inicia contagem de tempo)
+- `FINALIZADA` - Serviço concluído (finaliza contagem de tempo)
+- `CANCELADA` - Cliente não aprovou OS
+- `ENTREGUE` - Veículo entregue ao cliente
 
 ## 📈 Observabilidade
 
-### **New Relic APM**
-- Performance de endpoints
-- Latência de banco de dados
-- Taxa de erros
+### **Dashboard New Relic**
 
-### **Custom Metrics**
-- `Custom/OrdemServico/Criada` - Total de OS criadas
-- `Custom/OrdemServico/TempoNoStatus/{status}` - Tempo médio por status
-- `Custom/OrdemServico/Transicao/{de}_para_{para}` - Transições de status
+**Healthcheck e Uptime:**
+- Application Uptime (%)
+- Healthcheck Status
+- Disponibilidade por Endpoint
+
+**Performance:**
+- Latência média das APIs
+- Uso de CPU
+- Consumo de Memória
+
+**Métricas de Negócio:**
+- OS Criadas (últimas 24h)
+- Tempo Médio de Execução por Status
+
+**Erros:**
+- Taxa de erro das APIs (%)
+- Erros por endpoint
+
+### **Custom Events**
+- `OrdemServicoCriada` - Registro de criação de OS
+- `OrdemServicoTempoStatus` - Tempo em cada status (minutos)
+- `OrdemServicoMudancaStatus` - Transições de status
+- `OrdemServicoErro` - Erros no processamento
 
 ### SSH e logs (debug)
 
@@ -261,4 +311,4 @@ ssh -i ~/.ssh/oficina-key ubuntu@$(terraform output -raw public_ip) \
 
 ## 📝 Licença
 
-MIT — Tech Challenge 12SOAT Fase 3
+MIT — Tech Challenge 12SOAT
