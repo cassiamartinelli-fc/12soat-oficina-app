@@ -18,6 +18,7 @@ API REST para gerenciamento de ordens de serviço, clientes, veículos, peças e
   - https://github.com/cassiamartinelli-fc/12soat-oficina-infra-k8s
   - https://github.com/cassiamartinelli-fc/12soat-oficina-lambda-auth
   - https://github.com/cassiamartinelli-fc/12soat-oficina-app
+- Arquitetura: [Documentação arquitetural](https://github.com/cassiamartinelli-fc/12soat-oficina-app/blob/main/documentacao-arquitetural.pdf)
 
 ## 📚 Repositórios do Projeto
 
