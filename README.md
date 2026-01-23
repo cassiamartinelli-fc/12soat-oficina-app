@@ -311,4 +311,4 @@ ssh -i ~/.ssh/oficina-key ubuntu@$(terraform output -raw public_ip) \
 
 ## 📝 Licença
 
-MIT — Tech Challenge 12SOAT
+MIT — Tech Challenge 12SOAT - 2026
