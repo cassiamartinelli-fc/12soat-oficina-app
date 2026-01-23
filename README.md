@@ -19,7 +19,7 @@ Aplicação NestJS (Clean Architecture / DDD) para gestão de oficina mecânica.
 ## 🔗 Links Úteis
 
 ### Deploy Ativo
-- **Kong Gateway (API):** Execute workflow `Terraform AWS` → `output` para obter URL
+- **Kong Gateway (API):** Execute workflow `Terraform AWS` → `output` para obter `<KONG_URL>`
 - **Swagger/API Docs:** `<KONG_URL>/api-docs`
 - **Health Check:** `<KONG_URL>/health`
 - **New Relic APM:** https://one.newrelic.com
