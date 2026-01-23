@@ -25,7 +25,7 @@ Aplicação NestJS (Clean Architecture / DDD) para gestão de oficina mecânica.
 - **New Relic APM:** https://one.newrelic.com
 
 ### Documentação
-- **Vídeo de Apresentação:** [Em breve]
+- **Vídeo de Apresentação:** [Vídeo Grupo 70](https://youtu.be/5lpqyKaiK8Q)
 - **Postman Collection:** [Oficina Mecânica API](https://www.postman.com/cassia-martinelli-9397607/workspace/cassia-s-workspace/request/46977418-4a758cc9-d08a-4ca6-ab97-b522149755d5?action=share&creator=46977418&ctx=documentation)
 - **Arquitetura:** [Documentação arquitetural](https://github.com/cassiamartinelli-fc/12soat-oficina-app/blob/main/documentacao-arquitetural.pdf)
 
@@ -311,4 +311,4 @@ ssh -i ~/.ssh/oficina-key ubuntu@$(terraform output -raw public_ip) \
 
 ## 📝 Licença
 
-MIT — Tech Challenge 12SOAT - 2026
+MIT — Tech Challenge 12SOAT
